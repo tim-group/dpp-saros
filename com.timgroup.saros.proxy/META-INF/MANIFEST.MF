@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SarosProxy
+Bundle-SymbolicName: com.timgroup.saros.proxy;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.timgroup.saros.proxy.Activator
+Bundle-Vendor: TIMGROUP
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.runtime,
+ de.fu_berlin.inf.dpp;bundle-version="13.3.29",
+ org.eclipse.ui;bundle-version="3.104.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
