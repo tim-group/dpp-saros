@@ -89,8 +89,8 @@ public class ViewportActivity extends AbstractActivity implements
 
     @Override
     public String toString() {
-        return "ViewportActivity(path: " + path + ", range: (" + topIndex + ","
-            + bottomIndex + "))";
+        return "ViewportActivity(path: " + path + ", source=" + source
+            + ", range: (" + topIndex + "," + bottomIndex + "))";
     }
 
     @Override

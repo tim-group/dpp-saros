@@ -119,7 +119,8 @@ public class EditorActivity extends AbstractActivity implements
 
     @Override
     public String toString() {
-        return "EditorActivity(type: " + type + ", path: " + path + ")";
+        return "EditorActivity(type: " + type + ", path: " + path + ", source="
+            + source + ")";
     }
 
     @Override
