@@ -1,14 +1,26 @@
 package com.timgroup.saros.proxy;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IStartup;
-import org.osgi.framework.BundleContext;
 import org.picocontainer.annotations.Inject;
 
+import de.fu_berlin.inf.dpp.Saros;
 import de.fu_berlin.inf.dpp.SarosPluginContext;
 import de.fu_berlin.inf.dpp.User;
+import de.fu_berlin.inf.dpp.activities.SPath;
+import de.fu_berlin.inf.dpp.activities.business.EditorActivity;
+import de.fu_berlin.inf.dpp.activities.business.EditorActivity.Type;
 import de.fu_berlin.inf.dpp.activities.business.IActivity;
 import de.fu_berlin.inf.dpp.project.AbstractActivityProvider;
 import de.fu_berlin.inf.dpp.project.AbstractSarosSessionListener;
@@ -17,11 +29,14 @@ import de.fu_berlin.inf.dpp.project.ISarosSession;
 import de.fu_berlin.inf.dpp.project.ISarosSessionListener;
 import de.fu_berlin.inf.dpp.project.SarosSessionManager;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
 public class StartupSarosProxy implements IStartup {
 
 	@Override
 	public void earlyStartup() {
-	    System.out.println("Starting");
 	    Logger.getLogger(getClass()).info("Starting");
 	    WriteSomeFile.doIt("earlyStartup", "earlyStartup");
 	    
@@ -30,10 +45,10 @@ public class StartupSarosProxy implements IStartup {
         SarosPluginContext.reinject(this);
         
         WriteSomeFile.doIt("activator start", "activatorStart");
-        System.out.println("Started our plugin (timgroup)");
         logger.info("Started our plugin (timgroup)");
         
         sessionManager.addSarosSessionListener(sessionListener);
+        saros.asyncConnect();
 	}
 
     private static final Logger logger = Logger.getLogger(StartupSarosProxy.class);
@@ -42,7 +57,12 @@ public class StartupSarosProxy implements IStartup {
     @Inject
     private SarosSessionManager sessionManager;
     
+    @Inject
+    private Saros saros;
+    
     protected ISarosSessionListener sessionListener = new AbstractSarosSessionListener() {
+        
+        private ISarosSession session;
 
         @Override
         public void sessionStarting(ISarosSession session) {
@@ -54,7 +74,8 @@ public class StartupSarosProxy implements IStartup {
 
         @Override
         public void sessionStarted(ISarosSession session) {
-            session.addActivityProvider(spinUpEndpoint());
+            this.session = session;
+            this.session.addActivityProvider(spinUpEndpoint());
         }
 
         @Override
@@ -71,30 +92,61 @@ public class StartupSarosProxy implements IStartup {
         private IActivityProvider spinUpEndpoint() {
             WriteSomeFile.doIt("spin up endpoint", "spinUpEndpoint");
             logger.info("Started");
-            System.out.println("Started");
+
             // jetty embedded
             // handler setup
             
-            // receive file open event
-//            currentSession.getConcurrentDocumentClient().transformToJupiter(null);
-            
-
-            
             return new AbstractActivityProvider() {
+                private boolean first = true;
                 
                 @Override
                 public void exec(IActivity activity) {
                     System.out.println(activity);
                     logger.info(activity);
+                    Runnable r = new Runnable() {
+                        
+                        @Override
+                        public void run() {
+                            User user = session.getHost();
+                            Type type = EditorActivity.Type.ACTIVATED;
+                            IResource aResource = getRandomResource();
+                            if (aResource != null) {
+                                SPath spath = new SPath(aResource);
+                                EditorActivity activity = new EditorActivity(user, type, spath);
+                                logger.info("Firing event to open " + spath);
+                                fireActivity(activity);
+                            }
+                        }
+                        
+                        private IResource getRandomResource() {
+                            List<IProject> projects = new ArrayList<IProject>(session.getProjects());
+                            
+                            List<IFile> allResources = Arrays.asList(projects.get(0).getFile("/src/com/timgroup/alice/A.java"),
+                                                                     projects.get(0).getFile("/src/com/timgroup/alice/B.java"),
+                                                                     projects.get(0).getFile("/src/com/timgroup/alice/C.java"));
+                            if (allResources.isEmpty()) {
+                                return null;
+                            } else {
+                                return allResources.get(new Random().nextInt(allResources.size()));
+                            }
+                        }
+                    };
+                    if (first) {
+                        first = false;
+                        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(r, 3, 2, TimeUnit.SECONDS);
+                    }
                 }
+                
+                
             };
         }
     };
     
     protected void setupLoggers() {
         try {
-            PropertyConfigurator.configure(getClass().getClassLoader()
-                .getResource("saros.proxy.log4j.properties")); //$NON-NLS-1$
+            URL resource = getClass().getClassLoader()
+                .getResource("saros.proxy.log4j.properties");
+            PropertyConfigurator.configure(resource); //$NON-NLS-1$
         } catch (SecurityException e) {
             System.err.println("Could not start logging:"); //$NON-NLS-1$
             e.printStackTrace();
