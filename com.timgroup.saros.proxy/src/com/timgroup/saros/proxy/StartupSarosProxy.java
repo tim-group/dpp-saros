@@ -32,7 +32,6 @@ public class StartupSarosProxy implements IStartup {
         logger.info("Started our plugin (timgroup)");
         
         sessionManager.addSarosSessionListener(sessionListener);
-        saros.asyncConnect();
 	}
 
     private static final Logger logger = Logger.getLogger(StartupSarosProxy.class);
