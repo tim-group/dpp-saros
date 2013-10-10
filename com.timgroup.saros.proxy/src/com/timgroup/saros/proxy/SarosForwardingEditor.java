@@ -29,7 +29,7 @@ public final class SarosForwardingEditor implements Editor {
 
     @Override
     public Result edit(String filename, Edit edit) {
-        User user = session.getHost();
+        User user = session.getLocalUser();
         List<IProject> projects = new ArrayList<IProject>(session.getProjects());
         IResource aResource = projects.get(0).getFile(filename);
         SPath spath = new SPath(aResource);

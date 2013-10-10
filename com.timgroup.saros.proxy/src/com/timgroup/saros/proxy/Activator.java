@@ -1,11 +1,12 @@
 package com.timgroup.saros.proxy;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.picocontainer.annotations.Inject;
 
-import de.fu_berlin.inf.dpp.Saros;
 import de.fu_berlin.inf.dpp.SarosPluginContext;
 import de.fu_berlin.inf.dpp.User;
 import de.fu_berlin.inf.dpp.activities.business.IActivity;
@@ -15,8 +16,6 @@ import de.fu_berlin.inf.dpp.project.IActivityProvider;
 import de.fu_berlin.inf.dpp.project.ISarosSession;
 import de.fu_berlin.inf.dpp.project.ISarosSessionListener;
 import de.fu_berlin.inf.dpp.project.SarosSessionManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 public class Activator implements BundleActivator {
 
@@ -59,16 +58,6 @@ public class Activator implements BundleActivator {
         }
 
         private IActivityProvider spinUpEndpoint() {
-            WriteSomeFile.doIt("spin up endpoint", "spinUpEndpoint");
-            logger.info("Started");
-            System.out.println("Started");
-            // jetty embedded
-            // handler setup
-            
-            // receive file open event
-//            currentSession.getConcurrentDocumentClient().transformToJupiter(null);
-            
-
             
             return new AbstractActivityProvider() {
                 

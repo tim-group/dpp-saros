@@ -30,7 +30,7 @@ public final class SarosForwardingNavigator implements Navigator {
 
     @Override
     public Result goTo(String filename, Position position) {
-        User user = session.getHost();
+        User user = session.getLocalUser();
         Type type = EditorActivity.Type.ACTIVATED;
         List<IProject> projects = new ArrayList<IProject>(session.getProjects());
         IResource aResource = projects.get(0).getFile(filename);

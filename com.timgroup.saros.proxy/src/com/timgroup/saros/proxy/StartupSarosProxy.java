@@ -57,6 +57,7 @@ public class StartupSarosProxy implements IStartup {
         public void sessionStarted(ISarosSession session) {
             this.session = session;
             this.session.addActivityProvider(new HttpReceivingActivityProvider(session));
+//            this.session.addActivityProvider(new HttpForwardingActivityProvider(session));
         }
 
         @Override
