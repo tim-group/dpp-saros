@@ -18,6 +18,9 @@ import de.fu_berlin.inf.dpp.project.SarosSessionManager;
 
 public class StartupSarosProxy implements IStartup {
 
+    private static final String INTELLIJ_HOST = "localhost";
+    private static final int INTELLIJ_PORT = 7374;
+    
 	@Override
 	public void earlyStartup() {
 	    Logger.getLogger(getClass()).info("Starting");
@@ -57,7 +60,7 @@ public class StartupSarosProxy implements IStartup {
         public void sessionStarted(ISarosSession session) {
             this.session = session;
             this.session.addActivityProvider(new HttpReceivingActivityProvider(session));
-//            this.session.addActivityProvider(new HttpForwardingActivityProvider(session));
+            this.session.addActivityProvider(new HttpForwardingActivityProvider(INTELLIJ_HOST, INTELLIJ_PORT));
         }
 
         @Override
